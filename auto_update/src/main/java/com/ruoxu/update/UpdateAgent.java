@@ -5,4 +5,6 @@ package com.ruoxu.update;
  */
 public class UpdateAgent {
 
+
+
 }
