@@ -12,9 +12,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Created by ruulai002 on 16/9/12.
- */
 public final class HttpUtil {
 
     private final static String TAG = HttpUtil.class.getSimpleName();

@@ -42,7 +42,7 @@ public class VersionCheck {
     /**
      *
      * @param url
-     * @return 获取服务器版本
+     * @return 获取服务器版本 ,注意当前线程在Thread中
      */
     public VersionInfo remoteVersion (String url) {
         final VersionInfo versionInfo = new VersionInfo();
