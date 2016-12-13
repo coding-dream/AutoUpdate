@@ -4,7 +4,6 @@ import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.SecureRandom;
@@ -114,7 +113,7 @@ public final class HttpPost {
         @Override
         public void run() {
 
-            ignoreHttps(); //忽略https安全连接
+//            ignoreHttps(); //忽略https安全连接
 
             StringBuffer params = new StringBuffer();
 
@@ -124,23 +123,12 @@ public final class HttpPost {
 
             try {
                 HttpURLConnection connection = (HttpURLConnection) new URL(api).openConnection();
-//                connection.setRequestMethod("POST");
                 connection.setRequestMethod("GET");
                 connection.setConnectTimeout(1000 * 30);
                 connection.setReadTimeout(1000 * 30);
-                connection.setDoOutput(true);
 
-                OutputStream out = connection.getOutputStream();
-                if (out != null) {
-//                    out.write(postParams.getBytes());
-
-                    String content = readInputStream(connection.getInputStream());
-
-                    callback.done(content,null);
-
-                } else {
-                    callback.done(null, new RuntimeException("httpURLConnection outputstream is null"));
-                }
+                String content = readInputStream(connection.getInputStream());
+                callback.done(content,null);
 
             } catch (Exception e) {
                 callback.done(null, e);
@@ -184,6 +172,38 @@ public final class HttpPost {
     }
 
 
+    /** Post请求
+    StringBuffer params = new StringBuffer();
 
+    for (Map.Entry<String, String> entry : map.entrySet()) {
+        params.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
+    }
+
+    try {
+        HttpURLConnection connection = (HttpURLConnection) new URL(api).openConnection();
+        connection.setRequestMethod("POST");
+        connection.setConnectTimeout(1000 * 30);
+        connection.setReadTimeout(1000 * 30);
+        connection.setDoOutput(true);
+
+        OutputStream out = connection.getOutputStream();
+
+        String content = readInputStream(connection.getInputStream());
+        callback.done(content,null);
+
+        if (out != null) {
+            out.write(postParams.getBytes());
+
+            String content = readInputStream(connection.getInputStream());
+            callback.done(content,null);
+        } else {
+            callback.done(null, new RuntimeException("httpURLConnection outputstream is null"));
+        }
+
+    } catch (Exception e) {
+        callback.done(null, e);
+    }
+
+     */
 
 }

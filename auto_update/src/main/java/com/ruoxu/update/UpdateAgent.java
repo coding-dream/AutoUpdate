@@ -213,7 +213,7 @@ public class UpdateAgent {
 							public void onClick(DialogInterface dialog, int whichButton) {
 								Logger.i("取消更新");
 							}
-						}).create();
+						}).create().show();
 
 				break;
 			case 1:
@@ -230,7 +230,7 @@ public class UpdateAgent {
 								// 开启下载，此方法在通知栏弹出消息题型
 								UpdateAgent.getInstance().downloadApk(context, remoteVersion.getDownloadUrl());
 							}
-						}).create();
+						}).create().show();;
 				break;
 
 		}
