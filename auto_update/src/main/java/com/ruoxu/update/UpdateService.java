@@ -6,16 +6,13 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.util.Log;
 
+import com.orhanobut.logger.Logger;
 import com.ruoxu.update.util.DownloadTask;
 
 import java.io.File;
 
 public class UpdateService extends Service {
-
-    public final static String tag = UpdateService.class.getSimpleName();
-
 
 
     Handler handler = new Handler() {
@@ -27,7 +24,7 @@ public class UpdateService extends Service {
                     stopSelf();
                     break;
                 case Constants.MSG_DOWNLOAD_CANCEL:
-                    UpdateAgent.getInstance().updateCancel((Integer) msg.obj);
+                    UpdateAgent.getInstance().updateCancel();
                     stopSelf();
                     break;
                 case Constants.MSG_UPDATE_PROGRESS:
@@ -45,65 +42,56 @@ public class UpdateService extends Service {
 
     @Override
     public void onCreate() {
-        Log.d(tag, "onCreate");
         super.onCreate();
-
-        String apkName = "xx";
-        String url = "";
-        File apkFile = new File(Constants.save_path,apkName);
-        DownloadTask downloadTask = new DownloadTask(url,apkFile);
-        downloadTask.download(new DownloadTask.Callback() {
-            @Override
-            public <T> void event(int what, T msg) {
-                switch (what) {
-                    case DownloadTask.Callback.MSG_START:
-
-                        break;
-                    case DownloadTask.Callback.MSG_UPDATE:
-                        int progress = (Integer)msg;
-
-
-                        break;
-                    case DownloadTask.Callback.MSG_END:
-
-                        break;
-
-                }
-            }
-        });
-
-        //开始下载
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                // 判断SD卡是否存在，并且是否具有读写权限
-                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                    String apkName  = "xxx";
-                    File apkFile = new File(Constants.save_path,apkName);
-
-
-
-
-
-                    // 更新结束,更新通知栏并且结束更新服务
-                    handler.sendEmptyMessage(Constants.MSG_DOWNLOAD_DONE);
-                }
-
-            }
-
-        }).start();
+        Logger.i("Service onCreate");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        downloadUrl = intent.getStringExtra("url");
+
+        String apkName = intent.getStringExtra("apkName");
+        String url = intent.getStringExtra("url");
+        File apkFile = new File(Constants.save_path,apkName);
+        Logger.i("start download");
+
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+
+            DownloadTask downloadTask = new DownloadTask(url,apkFile);
+            downloadTask.download(new DownloadTask.Callback() {
+                @Override
+                public <T> void event(int what, T msg) {
+                    switch (what) {
+                        case DownloadTask.Callback.MSG_START:
+
+                            break;
+                        case DownloadTask.Callback.MSG_UPDATE:
+                            int progress = (Integer)msg;
+
+                            handler.removeMessages(Constants.MSG_UPDATE_PROGRESS);
+                            Message message = handler.obtainMessage(Constants.MSG_UPDATE_PROGRESS, progress);
+                            message.sendToTarget();
+
+                            break;
+                        case DownloadTask.Callback.MSG_END:
+                            // 更新结束,更新通知栏并且结束更新服务
+                            handler.sendEmptyMessage(Constants.MSG_DOWNLOAD_DONE);
+                            break;
+                        case DownloadTask.Callback.MSG_ERROR:
+                            handler.sendEmptyMessage(Constants.MSG_DOWNLOAD_CANCEL);
+                            break;
+
+                    }
+                }
+            });
+
+
+        }
+
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
-        Log.d(tag, "onDestroy");
         super.onDestroy();
     }
 

@@ -1,5 +1,7 @@
 package com.ruoxu.update.util;
 
+import com.orhanobut.logger.Logger;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,8 +16,6 @@ import java.util.concurrent.Executors;
  * Created by wangli on 16/12/12.
  */
 public class DownloadTask {
-    private final String tag = getClass().getSimpleName();
-
 
     private long mFinished = 0;  //记录下载过的 进度
     private String sUrl;
@@ -36,6 +36,7 @@ public class DownloadTask {
         int MSG_START = 0;
         int MSG_UPDATE = 1;
         int MSG_END = 2;
+        int MSG_ERROR = 3;
 
         <T>void event(int what,T msg);
     }
@@ -55,7 +56,6 @@ public class DownloadTask {
 
         @Override
         public void run() {
-
 
             HttpURLConnection conn = null;
 
@@ -79,7 +79,6 @@ public class DownloadTask {
 
                 // 设置文件长度，并通知主线程
                 callback.event(Callback.MSG_START,"初始化文件长度");
-
 
                 // 设置写入位置
                 fileOutputStream = new FileOutputStream(apkFile);
@@ -108,9 +107,11 @@ public class DownloadTask {
 
 
             } catch (MalformedURLException e) {
-                e.printStackTrace();
+                Logger.e(e);
+                callback.event(Callback.MSG_ERROR,"下载出错");
             } catch (IOException e) {
-                e.printStackTrace();
+                Logger.e(e);
+                callback.event(Callback.MSG_ERROR,"下载出错");
             } finally {
                 conn.disconnect();
                 IOUtils.close(inputStream);

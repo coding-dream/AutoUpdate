@@ -15,4 +15,5 @@ public class Constants {
     public final static String save_path = Environment.getExternalStorageDirectory() + "/Download";
 
 
+    public static final String SERVER_URL = "http://test.com";
 }

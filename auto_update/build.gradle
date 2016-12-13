@@ -20,7 +20,6 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.0.0'
-    compile 'com.github.wangli0:SuperTask:v0.3'
-
+    compile 'com.orhanobut:logger:1.4'
+    provided 'com.android.support:appcompat-v7:23.0.0'
 }

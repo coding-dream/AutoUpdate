@@ -12,18 +12,18 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public final class HttpUtil {
+public final class HttpPost {
 
-    private final static String TAG = HttpUtil.class.getSimpleName();
-    private static HttpUtil instance;
+    private final static String TAG = HttpPost.class.getSimpleName();
+    private static HttpPost instance;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 
-    public static HttpUtil getInstance(){
+    public static HttpPost getInstance(){
         if (instance == null) {
-            synchronized (HttpUtil.class) {
+            synchronized (HttpPost.class) {
                 if (instance == null) {
-                    instance = new HttpUtil();
+                    instance = new HttpPost();
                 }
             }
         }
