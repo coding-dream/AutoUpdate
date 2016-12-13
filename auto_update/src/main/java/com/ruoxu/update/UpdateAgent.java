@@ -25,13 +25,15 @@ public class UpdateAgent {
 
     static UpdateAgent instance;
 
+	int mUpdatingIconId = android.R.drawable.stat_sys_download;
+	int mUpdateFinishIconId = android.R.drawable.stat_sys_download_done;
+
+	int UPDATE_CONFIG ;
+
 	NotificationCompat.Builder mBuilder;
 	NotificationManager mNotificationManager;
 
-    int mUpdatingIconId = android.R.drawable.stat_sys_download;
-    int mUpdateFinishIconId = android.R.drawable.stat_sys_download_done;
-
-    public static UpdateAgent getInstance(){
+    protected static UpdateAgent getInstance(){
         if (instance == null) {
             synchronized (UpdateAgent.class) {
                 if (instance == null) {
@@ -42,16 +44,25 @@ public class UpdateAgent {
         return instance;
     }
 
+	// 3种方式仅用来修改Dialog显示问题
+
 	//默认更新(手动检测)
 	public static void update(Context context){
+		UpdateAgent.getInstance().UPDATE_CONFIG = 0;
+		update(context,Constants.SERVER_URL);
+	}
+	//强制更新(Dialog无法退出，且只有确定按钮，此方法建议用在MainActivity)
+	public static void forceUpdate(Context context){
+		UpdateAgent.getInstance().UPDATE_CONFIG = 1;
 		update(context,Constants.SERVER_URL);
 	}
 
-	//强制更新(Dialog无法退出，且只有确定按钮，此方法建议用在MainActivity)
-	
 
 	//静默更新(不弹出Dialog,遇到新版自动下载，不提示)
-
+	public static void silentUpdate(Context context){
+		UpdateAgent.getInstance().UPDATE_CONFIG = 2;
+		update(context,Constants.SERVER_URL);
+	}
 
 
 
@@ -64,7 +75,7 @@ public class UpdateAgent {
 			public <T> void done(T cachePath) {
 				if (cachePath != null) {
 					//存在缓存，且比当前版本 新
-					doInstall(context, (String)cachePath);
+					UpdateAgent.getInstance().doInstall(context, (String)cachePath);
 
 
 				} else {
@@ -75,7 +86,7 @@ public class UpdateAgent {
 							VersionInfo remoteVersion= (VersionInfo) t;
 							if (null!=remoteVersion) {
 								Toast.makeText(context, "检测到新版本", Toast.LENGTH_SHORT).show();
-								showDialog(context,remoteVersion);
+								UpdateAgent.getInstance().showDialog(context,remoteVersion);
 							} else {
 								Toast.makeText(context, "暂无新版", Toast.LENGTH_SHORT).show();
 							}
@@ -184,27 +195,52 @@ public class UpdateAgent {
 
 
 
-	private static void doInstall(Context context,String savePath) {
+	private void doInstall(Context context,String savePath) {
 		Intent intent = new Intent(Intent.ACTION_VIEW);
 		intent.setDataAndType(Uri.fromFile(new File(savePath)), "application/vnd.android.package-archive");
 		context.startActivity(intent);
 	}
 
-	private static void showDialog(final Context context, final VersionInfo remoteVersion) {
-		new AlertDialog.Builder(context)
-				.setTitle("更新")
-				.setMessage(remoteVersion.getUpdateInfo())
-				.setPositiveButton("更新", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						// 开启下载，此方法在通知栏弹出消息题型
-						UpdateAgent.getInstance().downloadApk(context, remoteVersion.getDownloadUrl());
-					}
-				})
-				.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						Logger.i("取消更新");
-					}
-				}).create();
+	private  void showDialog(final Context context, final VersionInfo remoteVersion) {
+		switch (UPDATE_CONFIG) {
+			case 0:
+				new AlertDialog.Builder(context)
+						.setTitle("更新")
+						.setMessage(remoteVersion.getUpdateInfo())
+						.setPositiveButton("更新", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								// 开启下载，此方法在通知栏弹出消息题型
+								UpdateAgent.getInstance().downloadApk(context, remoteVersion.getDownloadUrl());
+							}
+						})
+						.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								Logger.i("取消更新");
+							}
+						}).create();
+
+				break;
+			case 1:
+				// 开启下载，此方法在通知栏弹出消息题型
+				UpdateAgent.getInstance().downloadApk(context, remoteVersion.getDownloadUrl());
+				break;
+			case 2:
+				new AlertDialog.Builder(context)
+						.setTitle("更新")
+						.setMessage(remoteVersion.getUpdateInfo())
+						.setCancelable(false)
+						.setPositiveButton("更新", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								// 开启下载，此方法在通知栏弹出消息题型
+								UpdateAgent.getInstance().downloadApk(context, remoteVersion.getDownloadUrl());
+							}
+						}).create();
+				break;
+
+		}
+
+
+
 
 	}
 

@@ -1,9 +1,10 @@
 package com.ruoxu.learndemo;
 
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+
+import com.ruoxu.update.UpdateAgent;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,8 +23,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void click(View view) {
-        Intent intent = new Intent();
-        intent.setClass(this, MyService.class);
-        startService(intent);
+        UpdateAgent.update(this);
     }
 }
