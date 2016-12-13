@@ -16,4 +16,6 @@ public class Constants {
 
 
     public static final String SERVER_URL = "http://test.com";
+    public static final String APK_NAME = "xxx.apk";
+
 }

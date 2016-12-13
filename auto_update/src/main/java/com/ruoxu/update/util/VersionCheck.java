@@ -86,10 +86,9 @@ public class VersionCheck {
 
 
         /**
-         //	 * 检查是否有缓存更新文件
-         //	 *
-         //	 * @return 若返回false，说明没有缓存有效的更新文件，返回true说明有缓存更新文件
-         //	 */
+         * 检查是否有缓存更新文件
+         * @return 若返回false，说明没有缓存有效的更新文件，返回true说明有缓存更新文件
+         */
         public static void checkCache(Context context,Callback callback) {
             VersionInfo cacheVersion = new VersionInfo();
             SharedPreferences sp = context.getSharedPreferences(DB_UPDATE,Context.MODE_PRIVATE);

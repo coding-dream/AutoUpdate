@@ -24,7 +24,6 @@ public class UpdateAgent {
 
 
     static UpdateAgent instance;
-    private String apkName = "";
 
 	NotificationCompat.Builder mBuilder;
 	NotificationManager mNotificationManager;
@@ -43,11 +42,21 @@ public class UpdateAgent {
         return instance;
     }
 
+	//默认更新(手动检测)
 	public static void update(Context context){
 		update(context,Constants.SERVER_URL);
 	}
 
-    public static void update(final Context context, final String url){
+	//强制更新(Dialog无法退出，且只有确定按钮，此方法建议用在MainActivity)
+	
+
+	//静默更新(不弹出Dialog,遇到新版自动下载，不提示)
+
+
+
+
+
+    private static void update(final Context context, final String url){
         // 先检查是否缓存过更新信息
 
 		VersionCheck.checkCache(context, new VersionCheck.Callback() {
@@ -138,7 +147,7 @@ public class UpdateAgent {
 		mNotificationManager.notify(1, notification);
 
 		// 更新缓存信息
-		VersionCheck.updateCacheFile(applicationContext,Constants.save_path+File.separator+apkName);
+		VersionCheck.updateCacheFile(applicationContext,Constants.save_path+File.separator+Constants.APK_NAME);
 
     }
 
@@ -149,7 +158,7 @@ public class UpdateAgent {
     }
 
     public void updateNotificationPorgress(Integer progress) {
-        mBuilder.setProgress(100, progress, false).setDefaults(0);
+		mBuilder.setProgress(100, progress, false).setDefaults(0);
 		Notification notification = mBuilder.build();
 //
 		mNotificationManager.notify(1, notification);
@@ -168,7 +177,7 @@ public class UpdateAgent {
 
 	private PendingIntent getInstallIntent(Context context, int flags) {
 		Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setDataAndType(Uri.fromFile(new File(Constants.save_path + "/" + apkName)), "application/vnd.android.package-archive");
+		intent.setDataAndType(Uri.fromFile(new File(Constants.save_path + "/" + Constants.APK_NAME)), "application/vnd.android.package-archive");
 		PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, flags);
 		return pendingIntent;
 	}
