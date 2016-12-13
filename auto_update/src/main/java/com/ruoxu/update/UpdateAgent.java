@@ -28,7 +28,7 @@ public class UpdateAgent {
 	int mUpdatingIconId = android.R.drawable.stat_sys_download;
 	int mUpdateFinishIconId = android.R.drawable.stat_sys_download_done;
 
-	int UPDATE_CONFIG ;
+	int UPDATE_CONFIG = 0;
 
 	NotificationCompat.Builder mBuilder;
 	NotificationManager mNotificationManager;
@@ -48,7 +48,6 @@ public class UpdateAgent {
 
 	//默认更新(手动检测)
 	public static void update(Context context){
-		UpdateAgent.getInstance().UPDATE_CONFIG = 0;
 		update(context,Constants.SERVER_URL);
 	}
 	//强制更新(Dialog无法退出，且只有确定按钮，此方法建议用在MainActivity)
@@ -83,14 +82,14 @@ public class UpdateAgent {
 					VersionCheck.checkRemote(context, url, new VersionCheck.Callback() {
 						@Override
 						public <T> void done(T t) {
-							VersionInfo remoteVersion= (VersionInfo) t;
-							if (null!=remoteVersion) {
+							if (t != null) {
+								VersionInfo remoteVersion = (VersionInfo) t;
 								Toast.makeText(context, "检测到新版本", Toast.LENGTH_SHORT).show();
 								UpdateAgent.getInstance().showDialog(context,remoteVersion);
 							} else {
+								Logger.e("currentThread"+Thread.currentThread());
 								Toast.makeText(context, "暂无新版", Toast.LENGTH_SHORT).show();
 							}
-
 						}
 					});
 
@@ -106,7 +105,6 @@ public class UpdateAgent {
 
 
 	public void downloadApk(Context context, String downloadUrl){
-
 
 		// 新建文件夹
 		File fp = new File(Constants.save_path);
@@ -127,10 +125,10 @@ public class UpdateAgent {
 		Notification notification = mBuilder.build();
 
 		mNotificationManager.notify(1, notification);
-
 		// 启动下载服务
 		Intent service = new Intent(context, UpdateService.class);
-		service.putExtra("url", downloadUrl);
+		service.putExtra("apkName", Constants.APK_NAME);
+		service.putExtra("downloadUrl", downloadUrl);
 		context.startService(service);
 
 	}
@@ -150,9 +148,7 @@ public class UpdateAgent {
 				.setOngoing(false)
 				.setAutoCancel(true)
 				.setDefaults(Notification.DEFAULT_SOUND)
-				.setContentIntent(
-						getInstallIntent(applicationContext, Notification.FLAG_AUTO_CANCEL
-								| PendingIntent.FLAG_ONE_SHOT))
+				.setContentIntent(getInstallIntent(applicationContext, Notification.FLAG_AUTO_CANCEL| PendingIntent.FLAG_ONE_SHOT))
 				.setSmallIcon(mUpdateFinishIconId);
 		Notification notification = mBuilder.build();
 		mNotificationManager.notify(1, notification);
@@ -201,7 +197,7 @@ public class UpdateAgent {
 		context.startActivity(intent);
 	}
 
-	private  void showDialog(final Context context, final VersionInfo remoteVersion) {
+	private void showDialog(final Context context, final VersionInfo remoteVersion) {
 		switch (UPDATE_CONFIG) {
 			case 0:
 				new AlertDialog.Builder(context)

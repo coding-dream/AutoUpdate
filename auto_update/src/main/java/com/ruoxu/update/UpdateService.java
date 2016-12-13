@@ -50,7 +50,7 @@ public class UpdateService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         String apkName = intent.getStringExtra("apkName");
-        String url = intent.getStringExtra("url");
+        String url = intent.getStringExtra("downloadUrl");
         File apkFile = new File(Constants.save_path,apkName);
         Logger.i("start download");
 

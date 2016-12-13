@@ -7,10 +7,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.security.cert.X509Certificate;
 
 public final class HttpPost {
 
@@ -105,29 +113,26 @@ public final class HttpPost {
 
         @Override
         public void run() {
+
+            ignoreHttps(); //忽略https安全连接
+
             StringBuffer params = new StringBuffer();
 
             for (Map.Entry<String, String> entry : map.entrySet()) {
                 params.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
             }
 
-            params.append("delete");
-            String postParams = params.toString();
-            if (postParams.endsWith("&delete")) {
-                postParams.replace("&delete", "");
-            }
-
-
             try {
                 HttpURLConnection connection = (HttpURLConnection) new URL(api).openConnection();
-                connection.setRequestMethod("POST");
+//                connection.setRequestMethod("POST");
+                connection.setRequestMethod("GET");
                 connection.setConnectTimeout(1000 * 30);
                 connection.setReadTimeout(1000 * 30);
                 connection.setDoOutput(true);
 
                 OutputStream out = connection.getOutputStream();
                 if (out != null) {
-                    out.write(postParams.getBytes());
+//                    out.write(postParams.getBytes());
 
                     String content = readInputStream(connection.getInputStream());
 
@@ -142,4 +147,43 @@ public final class HttpPost {
             }
         }
     }
+
+
+
+    public void ignoreHttps(){
+        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager(){
+
+            public java.security.cert.X509Certificate[] getAcceptedIssuers(){return null;}
+
+            public void checkClientTrusted(X509Certificate[] certs, String authType){}
+
+            public void checkServerTrusted(X509Certificate[] certs, String authType){}
+
+            @Override
+            public void checkClientTrusted(java.security.cert.X509Certificate[] arg0, String arg1) throws CertificateException {
+
+            }
+            @Override
+            public void checkServerTrusted(java.security.cert.X509Certificate[] arg0, String arg1) throws CertificateException {
+
+            }
+        }};
+
+
+        try {
+            // Install the all-trusting trust manager
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustAllCerts, new SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());//忽略掉自签名的网络安全连接(https)
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+
+
+
 }

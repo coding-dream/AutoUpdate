@@ -6,6 +6,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.orhanobut.logger.Logger;
 import com.ruoxu.update.VersionInfo;
@@ -20,6 +21,7 @@ import java.io.File;
  */
 public class VersionCheck {
     private static final String DB_UPDATE = "update_info";
+    private static Handler handler = new Handler(Looper.getMainLooper());
 
     public interface Callback{
         <T>void done(T t);
@@ -61,12 +63,15 @@ public class VersionCheck {
             public <T> void done(T ret, Exception e) {
                 if (ret != null) {
                     String content = (String) ret;
+                    Logger.i(content);
+
                     try {
                         JSONObject object = new JSONObject(content);
                         String versionName = object.getString("versionName");
                         int versionCode = object.getInt("versionCode");
                         String downUrl = object.getString("downUrl");
                         String updateInfo = object.getString("updateInfo");
+
                         versionInfo.setVersionName(versionName);
                         versionInfo.setVersionCode(versionCode);
                         versionInfo.setDownloadUrl(downUrl);
@@ -75,7 +80,7 @@ public class VersionCheck {
                         callback.done(versionInfo);
 
                     } catch (JSONException jsonE) {
-                        jsonE.printStackTrace();
+                        callback.done(jsonE);
                     }
 
                 }
@@ -118,6 +123,19 @@ public class VersionCheck {
             remoteVersion(url, new Callback() {
                 @Override
                 public <T> void done(T t) {
+                    if (t instanceof JSONException) {
+                        Logger.e("Json 转换失败:"+t);
+
+                        postInMain(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.done(null);
+                            }
+                        });
+
+                        return;
+                    }
+
                     final VersionInfo remoteV = (VersionInfo) t;
                     VersionInfo localV = localVersion(context);
                     if (remoteV != null && localV != null) {
@@ -126,7 +144,7 @@ public class VersionCheck {
                             updateCache(context, remoteV);
 
                             //切换线程
-                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            postInMain(new Runnable() {
                                 @Override
                                 public void run() {
                                     callback.done(remoteV);
@@ -135,7 +153,13 @@ public class VersionCheck {
 
                         } else {
                             //暂无新版本
-                            callback.done(null);
+                            postInMain(new Runnable() {
+                                @Override
+                                public void run() {
+                                    callback.done(null);
+                                }
+                            });
+
                         }
                     }
 
@@ -158,6 +182,11 @@ public class VersionCheck {
 		SharedPreferences.Editor editor = sp.edit();
 		editor.putString("savePath", path);
 		editor.apply();
+    }
+
+
+    private static void postInMain(Runnable runnable){
+        handler.post(runnable);
     }
 
 
