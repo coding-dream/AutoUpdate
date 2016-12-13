@@ -19,18 +19,18 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.security.cert.X509Certificate;
 
-public final class HttpPost {
+public final class Api {
 
-    private final static String TAG = HttpPost.class.getSimpleName();
-    private static HttpPost instance;
+    private final static String TAG = Api.class.getSimpleName();
+    private static Api instance;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 
-    public static HttpPost getInstance(){
+    public static Api getInstance(){
         if (instance == null) {
-            synchronized (HttpPost.class) {
+            synchronized (Api.class) {
                 if (instance == null) {
-                    instance = new HttpPost();
+                    instance = new Api();
                 }
             }
         }
@@ -52,8 +52,11 @@ public final class HttpPost {
     }
 
 
+    public void sendRequest(final String url, final Callback callback) {
+        sendRequest(url, null, callback);
+    }
 
-    public void sendRequest(final String url, final Map<String, String> params, final Callback callback){
+    private void sendRequest(final String url, final Map<String, String> params, final Callback callback){
 
 
         Map<String, String> req = new HashMap<>();

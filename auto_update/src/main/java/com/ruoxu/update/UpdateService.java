@@ -43,7 +43,6 @@ public class UpdateService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Logger.i("Service onCreate");
     }
 
     @Override
@@ -52,7 +51,7 @@ public class UpdateService extends Service {
         String apkName = intent.getStringExtra("apkName");
         String url = intent.getStringExtra("downloadUrl");
         File apkFile = new File(Constants.save_path,apkName);
-        Logger.i("start download");
+
 
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
@@ -62,7 +61,7 @@ public class UpdateService extends Service {
                 public <T> void event(int what, T msg) {
                     switch (what) {
                         case DownloadTask.Callback.MSG_START:
-
+                            Logger.i("start download");
                             break;
                         case DownloadTask.Callback.MSG_UPDATE:
                             int progress = (Integer)msg;
@@ -77,6 +76,7 @@ public class UpdateService extends Service {
                             handler.sendEmptyMessage(Constants.MSG_DOWNLOAD_DONE);
                             break;
                         case DownloadTask.Callback.MSG_ERROR:
+                            Logger.e(msg.toString());
                             handler.sendEmptyMessage(Constants.MSG_DOWNLOAD_CANCEL);
                             break;
 

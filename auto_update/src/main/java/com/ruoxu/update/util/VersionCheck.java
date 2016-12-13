@@ -6,7 +6,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.orhanobut.logger.Logger;
 import com.ruoxu.update.VersionInfo;
@@ -58,7 +57,7 @@ public class VersionCheck {
     public static void remoteVersion (String url, final Callback callback) {
         final VersionInfo versionInfo = new VersionInfo();
 
-        HttpPost.getInstance().sendRequest(url, null, new HttpPost.Callback() {
+        Api.getInstance().sendRequest(url, new Api.Callback() {
             @Override
             public <T> void done(T ret, Exception e) {
                 if (ret != null) {

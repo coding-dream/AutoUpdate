@@ -50,15 +50,15 @@ public class UpdateAgent {
 	public static void update(Context context){
 		update(context,Constants.SERVER_URL);
 	}
-	//强制更新(Dialog无法退出，且只有确定按钮，此方法建议用在MainActivity)
-	public static void forceUpdate(Context context){
+
+	//静默更新(不弹出Dialog,遇到新版自动下载，不提示)
+	public static void silentUpdate(Context context){
 		UpdateAgent.getInstance().UPDATE_CONFIG = 1;
 		update(context,Constants.SERVER_URL);
 	}
 
-
-	//静默更新(不弹出Dialog,遇到新版自动下载，不提示)
-	public static void silentUpdate(Context context){
+	//强制更新(Dialog无法退出，且只有确定按钮，此方法建议用在MainActivity)
+	public static void forceUpdate(Context context){
 		UpdateAgent.getInstance().UPDATE_CONFIG = 2;
 		update(context,Constants.SERVER_URL);
 	}
@@ -66,7 +66,7 @@ public class UpdateAgent {
 
 
 
-    private static void update(final Context context, final String url){
+	private static void update(final Context context, final String url){
         // 先检查是否缓存过更新信息
 
 		VersionCheck.checkCache(context, new VersionCheck.Callback() {
@@ -159,7 +159,7 @@ public class UpdateAgent {
     }
 
     public void updateCancel() {
-        Logger.i("取消下载");
+		Logger.i("取消下载");
         mNotificationManager.cancelAll();
 
     }
@@ -171,8 +171,6 @@ public class UpdateAgent {
 		mNotificationManager.notify(1, notification);
     }
     //==========》Service中处理
-
-
 
 
 
@@ -230,7 +228,7 @@ public class UpdateAgent {
 								// 开启下载，此方法在通知栏弹出消息题型
 								UpdateAgent.getInstance().downloadApk(context, remoteVersion.getDownloadUrl());
 							}
-						}).create().show();;
+						}).create().show();
 				break;
 
 		}

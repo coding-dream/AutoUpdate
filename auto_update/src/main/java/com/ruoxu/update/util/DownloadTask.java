@@ -61,7 +61,7 @@ public class DownloadTask {
 
             FileOutputStream fileOutputStream = null;
             InputStream inputStream= null;
-
+            Logger.i("==>Download url is "+sUrl);
             try {
                 // 开启网络
                 URL url = new URL(sUrl);
@@ -74,9 +74,11 @@ public class DownloadTask {
                     length = conn.getContentLength();
                 }
                 if (length <= 0) {
+                    callback.event(Callback.MSG_ERROR,"读取有误-1");
                     return;
                 }
 
+                Logger.i("length"+length);
                 // 设置文件长度，并通知主线程
                 callback.event(Callback.MSG_START,"初始化文件长度");
 
@@ -107,13 +109,13 @@ public class DownloadTask {
 
 
             } catch (MalformedURLException e) {
-                Logger.e(e);
-                callback.event(Callback.MSG_ERROR,"下载出错");
+                callback.event(Callback.MSG_ERROR,"URL解析出错");
             } catch (IOException e) {
-                Logger.e(e);
-                callback.event(Callback.MSG_ERROR,"下载出错");
+                callback.event(Callback.MSG_ERROR,"下载出错IOExcetion");
             } finally {
-                conn.disconnect();
+                if (conn != null) {
+                    conn.disconnect();
+                }
                 IOUtils.close(inputStream);
                 IOUtils.close(fileOutputStream);
 
@@ -126,6 +128,7 @@ public class DownloadTask {
 
         }
     }
+
 
 
 }
