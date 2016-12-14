@@ -9,7 +9,7 @@ public class UpdateReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Toast.makeText(context, "你点击了取消", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "还未下载完成，请稍等片刻", Toast.LENGTH_SHORT).show();
 
     }
 }

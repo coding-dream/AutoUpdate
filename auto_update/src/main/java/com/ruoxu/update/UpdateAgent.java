@@ -2,6 +2,7 @@ package com.ruoxu.update;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.orhanobut.logger.Logger;
@@ -24,6 +26,7 @@ public class UpdateAgent {
 
 
     static UpdateAgent instance;
+	static String server = null;
 
 	int mUpdatingIconId = android.R.drawable.stat_sys_download;
 	int mUpdateFinishIconId = android.R.drawable.stat_sys_download_done;
@@ -44,23 +47,28 @@ public class UpdateAgent {
         return instance;
     }
 
+
+	public static void init(String url) {
+		server = url;
+	}
+
 	// 3种方式仅用来修改Dialog显示问题
 
 	//默认更新(手动检测)
 	public static void update(Context context){
-		update(context,Constants.SERVER_URL);
+		update(context,server);
 	}
 
 	//静默更新(不弹出Dialog,遇到新版自动下载，不提示)
 	public static void silentUpdate(Context context){
 		UpdateAgent.getInstance().UPDATE_CONFIG = 1;
-		update(context,Constants.SERVER_URL);
+		update(context,server);
 	}
 
 	//强制更新(Dialog无法退出，且只有确定按钮，此方法建议用在MainActivity)
 	public static void forceUpdate(Context context){
 		UpdateAgent.getInstance().UPDATE_CONFIG = 2;
-		update(context,Constants.SERVER_URL);
+		update(context,server);
 	}
 
 
@@ -68,6 +76,9 @@ public class UpdateAgent {
 
 	private static void update(final Context context, final String url){
         // 先检查是否缓存过更新信息
+		if (TextUtils.isEmpty(url)) {
+			Toast.makeText(context, "UpdateAgent 未初始化", Toast.LENGTH_SHORT).show();
+		}
 
 		VersionCheck.checkCache(context, new VersionCheck.Callback() {
 			@Override
