@@ -13,7 +13,7 @@ import com.ruoxu.update.util.DownloadTask;
 import java.io.File;
 
 public class UpdateService extends Service {
-
+    private boolean indeterminate = false; //控制进度条显示的样式
 
     Handler handler = new Handler() {
         @Override
@@ -28,7 +28,7 @@ public class UpdateService extends Service {
                     stopSelf();
                     break;
                 case Constants.MSG_UPDATE_PROGRESS:
-                    UpdateAgent.getInstance().updateNotificationPorgress((Integer) msg.obj);
+                    UpdateAgent.getInstance().updateNotificationPorgress((Integer) msg.obj,indeterminate);
                     break;
             }
         }
@@ -62,6 +62,7 @@ public class UpdateService extends Service {
                     switch (what) {
                         case DownloadTask.Callback.MSG_START:
                             Logger.i("start download");
+                            indeterminate = (Boolean) msg;
                             break;
                         case DownloadTask.Callback.MSG_UPDATE:
                             int progress = (Integer)msg;

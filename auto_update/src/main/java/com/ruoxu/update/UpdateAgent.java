@@ -87,8 +87,7 @@ public class UpdateAgent {
 								Toast.makeText(context, "检测到新版本", Toast.LENGTH_SHORT).show();
 								UpdateAgent.getInstance().showDialog(context,remoteVersion);
 							} else {
-								Logger.e("currentThread"+Thread.currentThread());
-								Toast.makeText(context, "暂无新版", Toast.LENGTH_SHORT).show();
+								Toast.makeText(context, "当前版本已是最新版本", Toast.LENGTH_SHORT).show();
 							}
 						}
 					});
@@ -164,8 +163,8 @@ public class UpdateAgent {
 
     }
 
-    public void updateNotificationPorgress(Integer progress) {
-		mBuilder.setProgress(100, progress, false).setDefaults(0);
+    public void updateNotificationPorgress(Integer progress,boolean indeterminate) {
+		mBuilder.setProgress(100, progress, indeterminate).setDefaults(0);
 		Notification notification = mBuilder.build();
 //
 		mNotificationManager.notify(1, notification);

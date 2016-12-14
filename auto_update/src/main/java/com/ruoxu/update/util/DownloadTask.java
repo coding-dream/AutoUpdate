@@ -57,6 +57,7 @@ public class DownloadTask {
         @Override
         public void run() {
 
+            boolean indeterminate = false;
             HttpURLConnection conn = null;
 
             FileOutputStream fileOutputStream = null;
@@ -67,20 +68,19 @@ public class DownloadTask {
                 URL url = new URL(sUrl);
                 conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
-                conn.setReadTimeout(5000);
+                conn.setReadTimeout(1000*30);
+                conn.setConnectTimeout(1000*30);
                 // 获取文件长度
                 int length = -1;
                 if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     length = conn.getContentLength();
                 }
                 if (length <= 0) {
-                    callback.event(Callback.MSG_ERROR,"读取有误-1");
-                    return;
+                    indeterminate = true; //此处需注意，如果是自己服务器，一定要在response中返回给客户端 response.setContentLength();大小，否则获取不到
                 }
 
-                Logger.i("length"+length);
                 // 设置文件长度，并通知主线程
-                callback.event(Callback.MSG_START,"初始化文件长度");
+                callback.event(Callback.MSG_START,indeterminate);
 
                 // 设置写入位置
                 fileOutputStream = new FileOutputStream(apkFile);

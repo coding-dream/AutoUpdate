@@ -14,7 +14,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        UpdateAgent.silentUpdate(this);
+//        UpdateAgent.silentUpdate(this);
 
 
 
@@ -23,6 +23,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void click(View view) {
-        UpdateAgent.silentUpdate(this);
+        UpdateAgent.forceUpdate(this);
     }
 }
