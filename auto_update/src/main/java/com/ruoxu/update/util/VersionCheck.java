@@ -6,6 +6,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 
 import com.orhanobut.logger.Logger;
 import com.ruoxu.update.VersionInfo;
@@ -187,6 +188,92 @@ public class VersionCheck {
     private static void postInMain(Runnable runnable){
         handler.post(runnable);
     }
+
+
+
+    // todo 扩展方法，这里可以再改造，时间关系，就没有必要再重写了
+    public static void remoteVersionByStr (String content, final Callback callback) {
+        final VersionInfo versionInfo = new VersionInfo();
+        Logger.i(content);
+        if (!TextUtils.isEmpty(content)) {
+
+            try {
+                JSONObject object = new JSONObject(content);
+                String versionName = object.getString("versionName");
+                int versionCode = object.getInt("versionCode");
+                String downUrl = object.getString("downUrl");
+                String updateInfo = object.getString("updateInfo");
+
+                versionInfo.setVersionName(versionName);
+                versionInfo.setVersionCode(versionCode);
+                versionInfo.setDownloadUrl(downUrl);
+                versionInfo.setUpdateInfo(updateInfo);
+
+                callback.done(versionInfo);
+
+            } catch (JSONException jsonE) {
+                callback.done(jsonE);
+            }
+
+        }
+
+
+
+    }
+
+
+    // todo 扩展方法，这里可以再改造，时间关系，就没有必要再重写了
+    public static void checkRemoteByStr(final Context context, String content, final Callback callback){
+
+        remoteVersionByStr(content, new Callback() {
+            @Override
+            public <T> void done(T t) {
+                if (t instanceof JSONException) {
+                    Logger.e("Json 转换失败:"+t);
+
+                    postInMain(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.done(null);
+                        }
+                    });
+
+                    return;
+                }
+
+                final VersionInfo remoteV = (VersionInfo) t;
+                VersionInfo localV = localVersion(context);
+                if (remoteV != null && localV != null) {
+                    if (remoteV.getVersionCode() > localV.getVersionCode()) {
+                        //有新版本了
+                        updateCache(context, remoteV);
+
+                        //切换线程
+                        postInMain(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.done(remoteV);
+                            }
+                        });
+
+                    } else {
+                        //暂无新版本
+                        postInMain(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.done(null);
+                            }
+                        });
+
+                    }
+                }
+
+            }
+        });
+    }
+
+
+
 
 
 

@@ -2,7 +2,6 @@ package com.ruoxu.update;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -19,6 +18,10 @@ import com.ruoxu.update.util.VersionCheck;
 
 import java.io.File;
 
+import static com.ruoxu.update.UpdateAgent.Type.defaultType;
+import static com.ruoxu.update.UpdateAgent.Type.forceType;
+import static com.ruoxu.update.UpdateAgent.Type.silentType;
+
 /**
  * Created by wangli on 16/12/9.
  */
@@ -31,7 +34,10 @@ public class UpdateAgent {
 	int mUpdatingIconId = android.R.drawable.stat_sys_download;
 	int mUpdateFinishIconId = android.R.drawable.stat_sys_download_done;
 
-	int UPDATE_CONFIG = 0;
+	Type type = defaultType;
+	public enum Type{
+		defaultType,forceType,silentType
+	}
 
 	NotificationCompat.Builder mBuilder;
 	NotificationManager mNotificationManager;
@@ -56,18 +62,19 @@ public class UpdateAgent {
 
 	//默认更新(手动检测)
 	public static void update(Context context){
+		UpdateAgent.getInstance().type = defaultType;
 		update(context,server);
 	}
 
 	//静默更新(不弹出Dialog,遇到新版自动下载，不提示)
 	public static void silentUpdate(Context context){
-		UpdateAgent.getInstance().UPDATE_CONFIG = 1;
+		UpdateAgent.getInstance().type = silentType;
 		update(context,server);
 	}
 
 	//强制更新(Dialog无法退出，且只有确定按钮，此方法建议用在MainActivity)
 	public static void forceUpdate(Context context){
-		UpdateAgent.getInstance().UPDATE_CONFIG = 2;
+		UpdateAgent.getInstance().type = forceType;
 		update(context,server);
 	}
 
@@ -111,6 +118,45 @@ public class UpdateAgent {
 
 
     }
+
+
+	public static void updateByStr(final Context context, final String content,Type what){
+		UpdateAgent.getInstance().type = what;
+
+		// 先检查是否缓存过更新信息
+		VersionCheck.checkCache(context, new VersionCheck.Callback() {
+			@Override
+			public <T> void done(T cachePath) {
+				if (cachePath != null) {
+					//存在缓存，且比当前版本 新
+					UpdateAgent.getInstance().doInstall(context, (String)cachePath);
+					Logger.i("存在缓存，且比当前已安装版本更新");
+
+				} else {
+					//无缓存，需联网对比版本后，根据对比结果决定是否下载
+					VersionCheck.checkRemoteByStr(context, content, new VersionCheck.Callback() {
+						@Override
+						public <T> void done(T t) {
+							if (t != null) {
+								VersionInfo remoteVersion = (VersionInfo) t;
+								Toast.makeText(context, "检测到新版本", Toast.LENGTH_SHORT).show();
+								UpdateAgent.getInstance().showDialog(context,remoteVersion);
+							} else {
+								Toast.makeText(context, "当前版本已是最新版本", Toast.LENGTH_SHORT).show();
+							}
+						}
+					});
+
+				}
+			}
+
+		});
+
+
+
+	}
+
+
 
 
 
@@ -206,8 +252,8 @@ public class UpdateAgent {
 	}
 
 	private void showDialog(final Context context, final VersionInfo remoteVersion) {
-		switch (UPDATE_CONFIG) {
-			case 0:
+		switch (type) {
+			case defaultType:
 				new AlertDialog.Builder(context)
 						.setTitle("更新")
 						.setMessage(remoteVersion.getUpdateInfo())
@@ -224,11 +270,11 @@ public class UpdateAgent {
 						}).create().show();
 
 				break;
-			case 1:
+			case silentType:
 				// 开启下载，此方法在通知栏弹出消息题型
 				UpdateAgent.getInstance().downloadApk(context, remoteVersion.getDownloadUrl());
 				break;
-			case 2:
+			case forceType:
 				new AlertDialog.Builder(context)
 						.setTitle("更新")
 						.setMessage(remoteVersion.getUpdateInfo())
