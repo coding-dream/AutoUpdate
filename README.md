@@ -1,6 +1,32 @@
-## Core
+## Android自动更新库
 
-Android通用Core库
+服务器url返回的的内容类似如下
 
-为了后期开发方便，此项目下存在多个库文件，其中learndemo为演示项目，测试各个库的使用案例。
-各个库之间顾不相干，可以通过gitmodules方式一次引入，单独模块下有相应的使用介绍
+```
+{
+ "versionName":"v1.0",
+ "versionCode":"2",
+ "downUrl":"https://git.oschina.net/need88.com/TempFile/raw/master/test.apk",   //apk的下载地址
+ "updateInfo":"1.更新xxx\n2.update bugs\n3.update fixs"
+}
+
+```
+
+## 方式一
+
+```
+ UpdateAgent.init(Constants.SERVER_URL);
+ UpdateAgent.update(this); //默认
+ //UpdateAgent.forceUpdate(this);//强制
+ //UpdateAgent.silentUpdate(this);//静默
+
+```
+
+
+## 方式二
+
+```
+String jsonStr = getStrFromServer();
+UpdateAgent.updateByStr(this,jsonStr, UpdateAgent.Type.defaultType); // UpdateAgent.Type.silentType,  UpdateAgent.Type.forceType
+
+```
