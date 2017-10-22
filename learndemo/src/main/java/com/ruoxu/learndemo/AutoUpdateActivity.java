@@ -17,12 +17,6 @@ public class AutoUpdateActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-
-
-
-
     }
 
     public void click(View view) {
@@ -30,8 +24,8 @@ public class AutoUpdateActivity extends AppCompatActivity {
             case R.id.btn1:
                 UpdateAgent.init(Constants.SERVER_URL);
                 UpdateAgent.update(this); //默认
-//              UpdateAgent.forceUpdate(this);//强制
-//              UpdateAgent.silentUpdate(this);//静默
+                // UpdateAgent.forceUpdate(this);// 强制
+                // UpdateAgent.silentUpdate(this);// 静默
 
                 break;
             case R.id.btn2:
@@ -58,7 +52,6 @@ public class AutoUpdateActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
                 break;
         }
 
